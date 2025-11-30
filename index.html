@@ -94,6 +94,7 @@
             box-shadow: var(--shadow-md);
             text-align: center;
             margin-bottom: 1rem;
+            position: relative;
         }
 
         h1 {
@@ -112,26 +113,30 @@
             margin: 0 0.25rem;
         }
 
-        /* Install Prompt */
-        .install-prompt {
-            background: var(--light-purple);
-            padding: 0.75rem;
-            border-radius: var(--border-radius-sm);
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .install-btn {
-            background: var(--primary-purple);
-            color: white;
+        /* Fixed Install Button */
+        .install-fixed-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent-yellow);
+            color: var(--dark-purple);
             border: none;
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius-pill);
             font-family: 'Quicksand';
             font-weight: 600;
-            margin-left: 0.5rem;
             cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .install-fixed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         /* ===================================
@@ -522,6 +527,12 @@
                 flex: 1;
                 justify-content: center;
             }
+
+            .install-fixed-btn {
+                position: static;
+                margin: 0.5rem auto;
+                display: inline-flex;
+            }
         }
 
         @media (max-width: 480px) {
@@ -545,6 +556,10 @@
                 padding-top: env(safe-area-inset-top);
                 padding-bottom: env(safe-area-inset-bottom);
             }
+
+            .install-fixed-btn {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -553,10 +568,9 @@
         <header>
             <h1>Notes App✨</h1>
             <p class="subtitle">✨ Your thoughts, safely stored offline 💖</p>
-            <div class="install-prompt" id="installPrompt">
-                Install this app for a better experience
-                <button class="install-btn" id="installBtn">Install</button>
-            </div>
+            <button class="install-fixed-btn" id="installFixedBtn">
+                📲 Install App
+            </button>
         </header>
 
         <div class="sidebar">
@@ -635,8 +649,7 @@
         const statusText = document.getElementById('status-text');
         const statusIcon = document.getElementById('status-icon');
         const lastSaved = document.getElementById('last-saved');
-        const installPrompt = document.getElementById('installPrompt');
-        const installBtn = document.getElementById('installBtn');
+        const installFixedBtn = document.getElementById('installFixedBtn');
         const notesCount = document.getElementById('notes-count');
 
         // PWA Installation
@@ -670,32 +683,56 @@
                 e.preventDefault();
                 // Stash the event so it can be triggered later
                 deferredPrompt = e;
-                // Show the install button
-                installPrompt.style.display = 'block';
             });
 
-            // Install button click handler
-            installBtn.addEventListener('click', async () => {
+            // Fixed install button click handler
+            installFixedBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
                     // Show the install prompt
                     deferredPrompt.prompt();
                     // Wait for the user to respond to the prompt
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') {
-                        installPrompt.style.display = 'none';
+                        console.log('User accepted the install prompt');
                     }
                     // Clear the saved prompt since it can't be used again
                     deferredPrompt = null;
+                } else {
+                    // Fallback for when automatic prompt doesn't work
+                    showInstallInstructions();
                 }
             });
 
             // Listen for app installed event
             window.addEventListener('appinstalled', () => {
                 // Hide the install button
-                installPrompt.style.display = 'none';
+                installFixedBtn.style.display = 'none';
                 // Clear the deferredPrompt variable
                 deferredPrompt = null;
             });
+
+            // Hide install button if already in standalone mode
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installFixedBtn.style.display = 'none';
+            }
+        }
+
+        // Fallback install instructions
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            
+            let message = '';
+            
+            if (isIOS) {
+                message = 'To install this app:\n1. Tap the share button 📱\n2. Scroll down\n3. Tap "Add to Home Screen"';
+            } else if (isAndroid) {
+                message = 'To install this app:\n1. Tap the menu (3 dots) ⋮\n2. Tap "Add to Home Screen"\n3. Tap "Add"';
+            } else {
+                message = 'Look for "Add to Home Screen" or "Install" in your browser menu';
+            }
+            
+            alert(message);
         }
 
         // Load notes from localStorage
