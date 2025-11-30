@@ -10,9 +10,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Notes App">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     
-    <link rel="manifest" href="manifest.json">
+    <!-- Icons using emoji as base64 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23b8a4d4' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>📝</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23b8a4d4' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>📝</text></svg>">
     
     <style>
         /* ===================================
@@ -134,7 +135,7 @@
         }
 
         /* ===================================
-           SIDEBAR
+           SIDEBAR - NOTES LIST
            =================================== */
         .sidebar {
             flex: 1;
@@ -152,6 +153,24 @@
             .sidebar {
                 max-height: none;
             }
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .notes-count {
+            background: var(--primary-purple);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-pill);
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
         /* ===================================
@@ -264,44 +283,62 @@
 
         .note-item {
             padding: 1.25rem;
-            border-bottom: 1px solid #f0edf5;
+            border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: var(--border-radius-sm);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
         }
 
         .note-item:hover {
             background-color: #f8f7fc;
             transform: translateX(5px);
+            border-color: var(--light-purple);
         }
 
         .note-item.active {
             background-color: var(--light-purple);
             border-left: 4px solid var(--primary-purple);
+            transform: translateX(0);
         }
 
         .note-title {
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 0.5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: var(--dark-purple);
+            font-size: 1.1rem;
         }
 
         .note-preview {
             color: var(--text-light);
             font-size: 0.9rem;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
             margin-bottom: 0.5rem;
+            line-height: 1.4;
         }
 
         .note-date {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-purple);
+            opacity: 0.6;
         }
 
         /* ===================================
@@ -534,6 +571,11 @@
                 <input type="text" id="search-input" placeholder="Search notes...">
             </div>
             
+            <div class="notes-header">
+                <h3>Your Notes</h3>
+                <span class="notes-count" id="notes-count">0 notes</span>
+            </div>
+            
             <ul class="notes-list" id="notes-list">
                 <!-- Notes will be dynamically added here -->
             </ul>
@@ -595,6 +637,7 @@
         const lastSaved = document.getElementById('last-saved');
         const installPrompt = document.getElementById('installPrompt');
         const installBtn = document.getElementById('installBtn');
+        const notesCount = document.getElementById('notes-count');
 
         // PWA Installation
         let deferredPrompt;
@@ -606,10 +649,17 @@
             setupEventListeners();
             updateOnlineStatus();
             setupPWA();
+            updateNotesCount();
             
             // Listen for online/offline events
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
+        }
+
+        // Update notes count
+        function updateNotesCount() {
+            const count = notes.length;
+            notesCount.textContent = `${count} note${count !== 1 ? 's' : ''}`;
         }
 
         // PWA Setup
@@ -660,6 +710,7 @@
         function saveNotes() {
             localStorage.setItem('notes', JSON.stringify(notes));
             lastSaved.textContent = `Last saved: ${new Date().toLocaleTimeString()}`;
+            updateNotesCount();
         }
 
         // Render the notes list
@@ -688,12 +739,15 @@
                 li.dataset.id = note.id;
                 
                 const date = new Date(note.updatedAt).toLocaleDateString();
-                const preview = note.content.substring(0, 50) + (note.content.length > 50 ? '...' : '');
+                const preview = note.content.substring(0, 100) + (note.content.length > 100 ? '...' : '');
                 
                 li.innerHTML = `
-                    <div class="note-title">${note.title || 'Untitled'}</div>
-                    <div class="note-preview">${preview}</div>
-                    <div class="note-date">${date}</div>
+                    <div class="note-title">${note.title || 'Untitled Note'}</div>
+                    <div class="note-preview">${preview || 'No content yet...'}</div>
+                    <div class="note-date">
+                        <span>${date}</span>
+                        <span class="note-indicator"></span>
+                    </div>
                 `;
                 
                 li.addEventListener('click', () => openNote(note.id));
@@ -744,7 +798,7 @@
                 // Create new note
                 notes.unshift({
                     id: currentNoteId,
-                    title,
+                    title: title || 'Untitled Note',
                     content,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -806,17 +860,6 @@
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
-
-        // Service Worker Registration for full PWA functionality
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
     </script>
 </body>
 </html>
