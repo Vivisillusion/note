@@ -3,124 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline Notes App</title>
+    <title>Notes App</title>
     <style>
+        /* ===================================
+           FONTS & CSS VARIABLES
+           =================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+
+        :root {
+            /* Colors */
+            --bg-color: #f5f3f0;
+            --primary-purple: #b8a4d4;
+            --dark-purple: #3d2e52;
+            --light-purple: #e8dfff;
+            --accent-yellow: #ffc97d;
+            --white: #ffffff;
+            --text-dark: #2d2838;
+            --text-light: #6b6578;
+            --tag-green: #d4f1e8;
+            --tag-text: #2d5f4d;
+            
+            /* Spacing */
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+            --border-radius-pill: 999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ===================================
+           RESET & BASE STYLES
+           =================================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            padding: 1rem;
         }
 
-        .container {
+        /* ===================================
+           APP CONTAINER
+           =================================== */
+        .app-container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-
-        .app-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.5rem;
         }
 
         @media (min-width: 768px) {
             .app-container {
                 flex-direction: row;
+                height: calc(100vh - 2rem);
             }
         }
 
+        /* ===================================
+           HEADER
+           =================================== */
+        header {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 700;
+            color: var(--dark-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        /* ===================================
+           SIDEBAR
+           =================================== */
         .sidebar {
             flex: 1;
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
             max-height: 600px;
             overflow-y: auto;
         }
 
+        @media (min-width: 768px) {
+            .sidebar {
+                max-height: none;
+            }
+        }
+
+        /* ===================================
+           BUTTONS
+           =================================== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.75rem;
+            border-radius: var(--border-radius-pill);
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-purple {
+            background-color: var(--primary-purple);
+            color: var(--white);
+        }
+
+        .btn-purple:hover {
+            background-color: #a590c4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 164, 212, 0.4);
+        }
+
+        .btn-white {
+            background-color: var(--white);
+            color: var(--dark-purple);
+            border: 2px solid var(--primary-purple);
+        }
+
+        .btn-white:hover {
+            background-color: var(--light-purple);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #ff6b6b;
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .new-note-btn {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        /* ===================================
+           SEARCH BOX
+           =================================== */
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            border: 2px solid #f0edf5;
+            border-radius: var(--border-radius-pill);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(184, 164, 212, 0.2);
+        }
+
+        /* ===================================
+           NOTES LIST
+           =================================== */
         .notes-list {
             list-style-type: none;
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
         .note-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 1.25rem;
+            border-bottom: 1px solid #f0edf5;
             cursor: pointer;
-            transition: background-color 0.2s;
-            border-radius: 5px;
-            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 0.5rem;
         }
 
         .note-item:hover {
-            background-color: #f8f9fa;
+            background-color: #f8f7fc;
+            transform: translateX(5px);
         }
 
         .note-item.active {
-            background-color: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            background-color: var(--light-purple);
+            border-left: 4px solid var(--primary-purple);
         }
 
         .note-title {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--dark-purple);
         }
 
         .note-preview {
-            color: #7f8c8d;
+            color: var(--text-light);
             font-size: 0.9rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
         }
 
         .note-date {
             font-size: 0.8rem;
-            color: #95a5a6;
-            margin-top: 5px;
+            color: var(--text-light);
         }
 
+        /* ===================================
+           MAIN CONTENT
+           =================================== */
         .main-content {
             flex: 2;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.5rem;
         }
 
+        /* ===================================
+           NOTE EDITOR
+           =================================== */
         .note-editor {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -128,82 +290,61 @@
 
         #note-title {
             width: 100%;
-            padding: 15px;
+            padding: 1rem;
             font-size: 1.5rem;
+            font-weight: 700;
             border: none;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 15px;
+            border-bottom: 2px solid #f0edf5;
+            margin-bottom: 1rem;
             outline: none;
+            font-family: 'Quicksand', sans-serif;
+            color: var(--dark-purple);
+            background-color: transparent;
+        }
+
+        #note-title::placeholder {
+            color: #b8b4c0;
         }
 
         #note-content {
             width: 100%;
             flex-grow: 1;
-            padding: 15px;
+            padding: 1rem;
             border: none;
             resize: none;
             outline: none;
             font-size: 1rem;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-dark);
+            background-color: transparent;
         }
 
+        #note-content::placeholder {
+            color: #b8b4c0;
+        }
+
+        /* ===================================
+           TOOLBAR
+           =================================== */
         .toolbar {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
+            margin-top: 1.5rem;
         }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
+        .toolbar .btn {
+            padding: 0.75rem 1.5rem;
         }
 
-        .btn-primary {
-            background-color: #2196f3;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #0b7dda;
-        }
-
-        .btn-danger {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #d32f2f;
-        }
-
-        .btn-success {
-            background-color: #4caf50;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #388e3c;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 10px;
-        }
-
+        /* ===================================
+           STATUS BAR
+           =================================== */
         .status-bar {
-            background-color: white;
-            border-radius: 10px;
-            padding: 10px 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-md);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -213,7 +354,7 @@
         .offline-indicator {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 0.5rem;
         }
 
         .online {
@@ -221,73 +362,146 @@
         }
 
         .offline {
-            color: #f44336;
+            color: #ff6b6b;
         }
 
-        .search-box {
-            margin-bottom: 20px;
+        #status-icon {
+            font-size: 1.2rem;
         }
 
-        #search-input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+        #last-saved {
+            color: var(--text-light);
         }
 
-        .new-note-btn {
-            width: 100%;
-            margin-bottom: 15px;
-            background-color: #4caf50;
-            color: white;
+        /* ===================================
+           EMPTY STATE
+           =================================== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
         }
 
-        .new-note-btn:hover {
-            background-color: #388e3c;
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--dark-purple);
+        }
+
+        /* ===================================
+           ANIMATIONS
+           =================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .note-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* ===================================
+           RESPONSIVE DESIGN
+           =================================== */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                max-height: 300px;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .toolbar > div {
+                display: flex;
+                gap: 0.75rem;
+            }
+            
+            .toolbar .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            .sidebar, .note-editor, .status-bar, header {
+                padding: 1rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <header>
-            <h1>Offline Notes App</h1>
-            <p class="subtitle">Your notes are stored locally and available even without internet</p>
+            <h1>Notes App</h1>
+            <p class="subtitle">Your thoughts, safely stored offline</p>
         </header>
 
-        <div class="app-container">
-            <div class="sidebar">
-                <button class="new-note-btn" id="new-note-btn">+ New Note</button>
+        <div class="sidebar">
+            <button class="btn btn-purple new-note-btn" id="new-note-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                New Note
+            </button>
+            
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search notes...">
+            </div>
+            
+            <ul class="notes-list" id="notes-list">
+                <!-- Notes will be dynamically added here -->
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="note-editor">
+                <input type="text" id="note-title" placeholder="Note Title">
+                <textarea id="note-content" placeholder="Start typing your note here..."></textarea>
                 
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Search notes...">
+                <div class="toolbar">
+                    <button class="btn btn-danger" id="delete-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                        Delete
+                    </button>
+                    <div>
+                        <button class="btn btn-purple" id="save-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                            </svg>
+                            Save
+                        </button>
+                    </div>
                 </div>
-                
-                <ul class="notes-list" id="notes-list">
-                    <!-- Notes will be dynamically added here -->
-                </ul>
             </div>
 
-            <div class="main-content">
-                <div class="note-editor">
-                    <input type="text" id="note-title" placeholder="Note Title">
-                    <textarea id="note-content" placeholder="Start typing your note here..."></textarea>
-                    
-                    <div class="toolbar">
-                        <button class="btn-danger" id="delete-btn">Delete</button>
-                        <div>
-                            <button class="btn-primary" id="save-btn">Save</button>
-                        </div>
-                    </div>
+            <div class="status-bar">
+                <div class="offline-indicator">
+                    <span id="status-icon">●</span>
+                    <span id="status-text">Online</span>
                 </div>
-
-                <div class="status-bar">
-                    <div class="offline-indicator">
-                        <span id="status-icon">●</span>
-                        <span id="status-text">Online</span>
-                    </div>
-                    <div id="last-saved">Last saved: Never</div>
-                </div>
+                <div id="last-saved">Last saved: Never</div>
             </div>
         </div>
     </div>
