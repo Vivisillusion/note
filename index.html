@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes App</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#b8a4d4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Notes App">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+    
+    <link rel="manifest" href="manifest.json">
+    
     <style>
         /* ===================================
            FONTS & CSS VARIABLES
@@ -99,6 +109,28 @@
 
         .subtitle .emoji {
             margin: 0 0.25rem;
+        }
+
+        /* Install Prompt */
+        .install-prompt {
+            background: var(--light-purple);
+            padding: 0.75rem;
+            border-radius: var(--border-radius-sm);
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .install-btn {
+            background: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-pill);
+            font-family: 'Quicksand';
+            font-weight: 600;
+            margin-left: 0.5rem;
+            cursor: pointer;
         }
 
         /* ===================================
@@ -468,6 +500,15 @@
                 padding: 0.75rem 1.25rem;
             }
         }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) and (display-mode: standalone) {
+            body {
+                padding: 0.5rem;
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
     </style>
 </head>
 <body>
@@ -475,6 +516,10 @@
         <header>
             <h1>Notes App</h1>
             <p class="subtitle">✨ Your thoughts, safely stored offline 💖</p>
+            <div class="install-prompt" id="installPrompt">
+                Install this app for a better experience
+                <button class="install-btn" id="installBtn">Install</button>
+            </div>
         </header>
 
         <div class="sidebar">
@@ -548,6 +593,11 @@
         const statusText = document.getElementById('status-text');
         const statusIcon = document.getElementById('status-icon');
         const lastSaved = document.getElementById('last-saved');
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+
+        // PWA Installation
+        let deferredPrompt;
 
         // Initialize the app
         function init() {
@@ -555,10 +605,47 @@
             renderNotesList();
             setupEventListeners();
             updateOnlineStatus();
+            setupPWA();
             
             // Listen for online/offline events
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
+        }
+
+        // PWA Setup
+        function setupPWA() {
+            // Listen for beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the mini-infobar from appearing on mobile
+                e.preventDefault();
+                // Stash the event so it can be triggered later
+                deferredPrompt = e;
+                // Show the install button
+                installPrompt.style.display = 'block';
+            });
+
+            // Install button click handler
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Show the install prompt
+                    deferredPrompt.prompt();
+                    // Wait for the user to respond to the prompt
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installPrompt.style.display = 'none';
+                    }
+                    // Clear the saved prompt since it can't be used again
+                    deferredPrompt = null;
+                }
+            });
+
+            // Listen for app installed event
+            window.addEventListener('appinstalled', () => {
+                // Hide the install button
+                installPrompt.style.display = 'none';
+                // Clear the deferredPrompt variable
+                deferredPrompt = null;
+            });
         }
 
         // Load notes from localStorage
@@ -719,6 +806,17 @@
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
+
+        // Service Worker Registration for full PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
