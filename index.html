@@ -94,7 +94,6 @@
             box-shadow: var(--shadow-md);
             text-align: center;
             margin-bottom: 1rem;
-            position: relative;
         }
 
         h1 {
@@ -111,32 +110,6 @@
 
         .subtitle .emoji {
             margin: 0 0.25rem;
-        }
-
-        /* Fixed Install Button */
-        .install-fixed-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--accent-yellow);
-            color: var(--dark-purple);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-pill);
-            font-family: 'Quicksand';
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
-
-        .install-fixed-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
         }
 
         /* ===================================
@@ -430,6 +403,19 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.9rem;
+            gap: 1rem;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .offline-indicator {
@@ -452,6 +438,30 @@
 
         #last-saved {
             color: var(--text-light);
+        }
+
+        /* Install Button in Status Bar */
+        .install-status-btn {
+            background: var(--accent-yellow);
+            color: var(--dark-purple);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius-pill);
+            font-family: 'Quicksand';
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .install-status-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         /* ===================================
@@ -528,10 +538,14 @@
                 justify-content: center;
             }
 
-            .install-fixed-btn {
-                position: static;
-                margin: 0.5rem auto;
-                display: inline-flex;
+            .status-bar {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+
+            .status-left, .status-right {
+                justify-content: center;
             }
         }
 
@@ -547,6 +561,15 @@
             .btn {
                 padding: 0.75rem 1.25rem;
             }
+
+            .status-bar {
+                font-size: 0.8rem;
+            }
+
+            .install-status-btn {
+                font-size: 0.7rem;
+                padding: 0.35rem 0.7rem;
+            }
         }
 
         /* Mobile-specific styles */
@@ -557,7 +580,7 @@
                 padding-bottom: env(safe-area-inset-bottom);
             }
 
-            .install-fixed-btn {
+            .install-status-btn {
                 display: none !important;
             }
         }
@@ -568,9 +591,6 @@
         <header>
             <h1>Notes App✨</h1>
             <p class="subtitle">✨ Your thoughts, safely stored offline 💖</p>
-            <button class="install-fixed-btn" id="installFixedBtn">
-                📲 Install App
-            </button>
         </header>
 
         <div class="sidebar">
@@ -620,11 +640,20 @@
             </div>
 
             <div class="status-bar">
-                <div class="offline-indicator">
-                    <span id="status-icon">●</span>
-                    <span id="status-text">Online</span>
+                <div class="status-left">
+                    <div class="offline-indicator">
+                        <span id="status-icon">●</span>
+                        <span id="status-text">Online</span>
+                    </div>
                 </div>
-                <div id="last-saved">Last saved: Never</div>
+                
+                <button class="install-status-btn" id="installStatusBtn">
+                    📲 Install App
+                </button>
+                
+                <div class="status-right">
+                    <div id="last-saved">Last saved: Never</div>
+                </div>
             </div>
         </div>
     </div>
@@ -649,7 +678,7 @@
         const statusText = document.getElementById('status-text');
         const statusIcon = document.getElementById('status-icon');
         const lastSaved = document.getElementById('last-saved');
-        const installFixedBtn = document.getElementById('installFixedBtn');
+        const installStatusBtn = document.getElementById('installStatusBtn');
         const notesCount = document.getElementById('notes-count');
 
         // PWA Installation
@@ -685,8 +714,8 @@
                 deferredPrompt = e;
             });
 
-            // Fixed install button click handler
-            installFixedBtn.addEventListener('click', async () => {
+            // Status bar install button click handler
+            installStatusBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
                     // Show the install prompt
                     deferredPrompt.prompt();
@@ -706,14 +735,14 @@
             // Listen for app installed event
             window.addEventListener('appinstalled', () => {
                 // Hide the install button
-                installFixedBtn.style.display = 'none';
+                installStatusBtn.style.display = 'none';
                 // Clear the deferredPrompt variable
                 deferredPrompt = null;
             });
 
             // Hide install button if already in standalone mode
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                installFixedBtn.style.display = 'none';
+                installStatusBtn.style.display = 'none';
             }
         }
 
@@ -725,7 +754,7 @@
             let message = '';
             
             if (isIOS) {
-                message = 'To install this app:\n1. Tap the share button 📱\n2. Scroll down\n3. Tap "Add to Home Screen"';
+                message = 'To install this app:\n1. Tap the share button 📱\n2. Scroll down\nn3. Tap "Add to Home Screen"';
             } else if (isAndroid) {
                 message = 'To install this app:\n1. Tap the menu (3 dots) ⋮\n2. Tap "Add to Home Screen"\n3. Tap "Add"';
             } else {
