@@ -50,6 +50,8 @@
             overflow-x: hidden;
             min-height: 100vh;
             padding: 1rem;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ===================================
@@ -61,6 +63,7 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+            flex: 1;
         }
 
         @media (min-width: 768px) {
@@ -92,6 +95,10 @@
         .subtitle {
             color: var(--text-light);
             font-size: 1rem;
+        }
+
+        .subtitle .emoji {
+            margin: 0 0.25rem;
         }
 
         /* ===================================
@@ -388,6 +395,21 @@
         }
 
         /* ===================================
+           FOOTER
+           =================================== */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* ===================================
            ANIMATIONS
            =================================== */
         @keyframes fadeIn {
@@ -452,7 +474,7 @@
     <div class="app-container">
         <header>
             <h1>Notes App</h1>
-            <p class="subtitle">Your thoughts, safely stored offline</p>
+            <p class="subtitle">✨ Your thoughts, safely stored offline 💖</p>
         </header>
 
         <div class="sidebar">
@@ -505,6 +527,10 @@
             </div>
         </div>
     </div>
+
+    <footer>
+        <p>Made with 🧡 by Viviane Furtado</p>
+    </footer>
 
     <script>
         // Notes data structure
